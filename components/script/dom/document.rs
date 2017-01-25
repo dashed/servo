@@ -530,11 +530,6 @@ impl Document {
         self.reflow_timeout.set(Some(timeout))
     }
 
-    /// Disables any pending reflow timeouts.
-    pub fn disarm_reflow_timeout(&self) {
-        self.reflow_timeout.set(None)
-    }
-
     /// Remove any existing association between the provided id and any elements in this document.
     pub fn unregister_named_element(&self, to_unregister: &Element, id: Atom) {
         debug!("Removing named element from document {:p}: {:p} id={}",
@@ -1556,6 +1551,9 @@ impl Document {
                 self.process_deferred_scripts();
             },
             LoadType::PageSource(_) => {
+                // Disarm the reflow timer that suppresses reflows until its timeout.
+                self.reflow_timeout.set(None);
+
                 // Deferred scripts have to wait for page to finish loading,
                 // this is the first opportunity to process them.
 
